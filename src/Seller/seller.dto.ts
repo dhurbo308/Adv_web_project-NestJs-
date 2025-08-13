@@ -1,4 +1,4 @@
-import { Matches, IsEmail, IsIn, IsInt, Min } from "class-validator";
+import { Matches, IsEmail, IsIn, IsInt, Min,IsOptional } from "class-validator";
 import { SellerName } from "./validators/name.validator";
 
 export class SellerDTO {
@@ -24,6 +24,9 @@ export class SellerDTO {
     message: "Status must be either 'active' or 'inactive'",
   })
   status: string = "active";
+
+  @IsOptional()
+  adminId?: number; // Optional admin assignment
   
 }
 

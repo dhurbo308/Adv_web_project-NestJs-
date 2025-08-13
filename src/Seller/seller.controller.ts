@@ -1,4 +1,4 @@
-import {Controller, Post, Get, Patch, Param, Body, UploadedFile, UseInterceptors, UsePipes, ValidationPipe, ParseIntPipe,} from '@nestjs/common';
+import {Controller, Post, Get, Patch, Param, Body, UploadedFile, UseInterceptors, UsePipes, ValidationPipe, ParseIntPipe,Delete,Put} from '@nestjs/common';
 import { SellerService } from './seller.service';
 import { SellerDTO } from './seller.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -36,6 +36,22 @@ export class SellerController {
   async getSellersOlderThan40() {
     return this.sellerService.findSellersOlderThan40();
   }
+
+  @Delete('delete/:id')
+  async deleteSeller(@Param('id', ParseIntPipe) id: number) {
+    return this.sellerService.deleteSellerById(id);
+  }
+
+  @Put('updateseller/:id')
+  @UsePipes(new ValidationPipe({ skipMissingProperties: true }))//skipMissingProperties: true validation pipe means it won't complaine about missing filds.
+  async updateSeller(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateData: Partial<SellerDTO>
+  ) {
+    return this.sellerService.updateSeller(id, updateData);
+  }
+
+
 
   @Post('uploadfile')
   @UseInterceptors(

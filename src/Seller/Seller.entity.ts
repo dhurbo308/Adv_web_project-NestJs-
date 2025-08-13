@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column,ManyToOne } from "typeorm";
+import { AdminEntity } from "src/Admin/admin.entity";
 
 @Entity("sellers")
 export class SellerEntity {
@@ -19,5 +20,9 @@ export class SellerEntity {
 
   @Column({ default: "active" })
   status: string;
+  
+  @ManyToOne(() => AdminEntity, admin => admin.approvedSellers, { nullable: true })
+  admin: AdminEntity;
+
     
 }
