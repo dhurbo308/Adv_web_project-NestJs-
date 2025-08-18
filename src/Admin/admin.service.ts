@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { AdminEntity } from './admin.entity';
 import { AdminDTO } from './admin.dto';
 import { SellerEntity } from '../Seller/Seller.entity';
+import * as bcrypt from "bcrypt";
 
 @Injectable()
 export class AdminService {
@@ -16,8 +17,17 @@ export class AdminService {
   ) {}
 
   // Create a new admin
-  async createAdmin(data: AdminDTO): Promise<AdminEntity> {
-    const admin = this.adminRepo.create(data);
+  // async createAdmin(data: AdminDTO): Promise<AdminEntity> {
+  //   const admin = this.adminRepo.create(data);
+  //   return this.adminRepo.save(admin);
+  // }
+
+  async createAdmin(data: AdminDTO): Promise<AdminEntity>{
+    const salt = await bcrypt.genSalt(); // generate salt
+    const hashedPassword = await bcrypt.hash(data.password, salt); // hash with salt
+
+    const admin = this.adminRepo.create({...data,password: hashedPassword,});
+
     return this.adminRepo.save(admin);
   }
 
@@ -25,6 +35,29 @@ export class AdminService {
   async getAllAdmins(): Promise<AdminEntity[]> {
     return this.adminRepo.find({ relations: ['approvedSellers'] });
   }
+
+  //  Login validation with bcrypt.compare
+  // async login(email: string, password: string): Promise<AdminEntity | null> {
+  //   const admin = await this.adminRepo.findOne({ where: { email } });
+  //   if (!admin) return null;
+
+  //   const isMatch = await bcrypt.compare(password, admin.password); // check plain vs hash
+  //   return isMatch ? admin : null;
+  // }
+
+  async login(email: string, password: string, session: any): Promise<AdminEntity | null> {
+    const admin = await this.adminRepo.findOne({ where: { email } });
+    if (!admin) return null;
+
+    const isMatch = await bcrypt.compare(password, admin.password);
+    if (isMatch) {
+      session.adminId = admin.id;
+      session.email = admin.email;
+      return admin;
+    }
+    return null;
+  }
+
 
   // Approve a seller by admin
   async approveSeller(adminId: number, sellerId: number): Promise<SellerEntity> {
@@ -37,4 +70,10 @@ export class AdminService {
     seller.admin = admin;
     return this.sellerRepo.save(seller);
   }
+
+  async logout(session: any): Promise<{ message: string }> {
+    session.destroy();
+    return { message: 'Logged out successfully' };
+ }
+
 }

@@ -63,7 +63,7 @@ export class SellerController {
           cb(new MulterError('LIMIT_UNEXPECTED_FILE', 'file'), false);
         }
       },
-      limits: { fileSize: 2000000 },
+      limits: { fileSize: 5000000 },
       storage: diskStorage({
         destination: './uploads',
         filename: (req, file, cb) => {
