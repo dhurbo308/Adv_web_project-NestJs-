@@ -12,6 +12,10 @@ async function bootstrap() {
     cookie: { maxAge: 3600000 }, // 1 hour
   }),
 );
+app.enableCors({
+    origin: 'http://localhost:8000', // frontend URL
+    credentials: true,               // allow cookies
+  });
 
   await app.listen(process.env.PORT ?? 7000);
 }

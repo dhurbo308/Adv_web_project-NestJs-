@@ -1,22 +1,46 @@
-import {Controller, Post, Get, Patch, Param, Body, UploadedFile, UseInterceptors, UsePipes, ValidationPipe, ParseIntPipe,Delete,Put} from '@nestjs/common';
+import {Controller, Post, Get, Patch, Param, Body, UploadedFile, UseInterceptors, UsePipes, ValidationPipe, ParseIntPipe,Delete,Put, Session, NotFoundException, ForbiddenException, Req} from '@nestjs/common';
 import { SellerService } from './seller.service';
 import { SellerDTO } from './seller.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage, MulterError } from 'multer';
 
+
 @Controller('seller')
 export class SellerController {
   constructor(private readonly sellerService: SellerService) {}
 
-  @Get('profile')
-  getProfile(): string {
-    return this.sellerService.getProfile();
+  @Get('profile/:id')
+  async getProfile(@Param('id', ParseIntPipe) id: number) {
+    return this.sellerService.getProfile(id);
+  }
+
+   @Get('me')
+    async getMyProfile(@Session() session: Record<string, any>) {
+    const sellerId = session.sellerId;
+    if (!sellerId) throw new NotFoundException("Seller is not logged in");
+    return this.sellerService.getProfile(sellerId);
   }
 
   @Post('create')
   @UsePipes(new ValidationPipe())
   async createSeller(@Body() data: SellerDTO) {
     return this.sellerService.createSeller(data);
+  }
+  @Post("login")
+  async login(
+  @Body() body: { email: string; },
+  @Session() session: Record<string, any>
+) {
+  const seller = await this.sellerService.login(body.email,  session);
+  if (!seller) {
+    return { message: "Invalid credentials" };
+  }
+  return { message: "Login successful", seller };
+}
+
+ @Post("logout")
+  async logout(@Session() session: Record<string, any>) {
+    return this.sellerService.logout(session);
   }
 
   @Patch('status/:id')
@@ -50,6 +74,14 @@ export class SellerController {
   ) {
     return this.sellerService.updateSeller(id, updateData);
   }
+// @Put("updateseller/:id")
+// async updateSeller(@Param("id") id: number, @Body() dto: SellerDTO, @Req() req) {
+//   const loggedInSellerId = req.session?.seller?.id; // if using session
+//   if (loggedInSellerId !== id) {
+//     throw new ForbiddenException("You can only edit your own profile");
+//   }
+//   return this.sellerService.updateSeller(id, dto);
+// }
 
 
 

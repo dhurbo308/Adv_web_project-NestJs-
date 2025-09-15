@@ -31,6 +31,10 @@ export class AdminService {
     return this.adminRepo.save(admin);
   }
 
+    async getProfile(id: number):Promise<AdminEntity | null> {
+    return this.adminRepo.findOneBy({id});
+  }
+
   // Get all admins
   async getAllAdmins(): Promise<AdminEntity[]> {
     return this.adminRepo.find({ relations: ['approvedSellers'] });

@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Param, Body, ParseIntPipe, UsePipes, ValidationPipe, UseGuards, Session } from '@nestjs/common';
+import { Controller, Post, Get, Param, Body, ParseIntPipe, UsePipes, ValidationPipe, UseGuards, Session, NotFoundException } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { AdminDTO } from './admin.dto';
 import { SessionGuard } from 'src/auth/session.guard';
@@ -13,6 +13,12 @@ export class AdminController {
   async createAdmin(@Body() data: AdminDTO) {
     return this.adminService.createAdmin(data);
   }
+  @Get('me')
+      async getMyProfile(@Session() session: Record<string, any>) {
+      const adminId = session.adminId;
+      if (!adminId) throw new NotFoundException("Seller is not logged in");
+      return this.adminService.getProfile(adminId);
+    }
 
   // Get all admins with their approved sellers
   @Get('all')

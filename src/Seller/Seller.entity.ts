@@ -3,6 +3,9 @@ import { AdminEntity } from "src/Admin/admin.entity";
 
 @Entity("sellers")
 export class SellerEntity {
+  password(password: string, password1: any) {
+    throw new Error('Method not implemented.');
+  }
   @PrimaryGeneratedColumn({ unsigned: true })
   id: number;
 
